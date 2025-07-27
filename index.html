@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSmart - Sistema de Reciclaje Escolar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Real-time Notifications Container -->
+        <div id="notification-container" class="notification-container"></div>
+        
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-spinner"></div>
+            <p>Cargando EcoSmart...</p>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="main-menu" class="page active">
+            <div class="container">
+                <header class="main-header">
+                    <div class="logo-container">
+                        <i class="fas fa-recycle logo-icon"></i>
+                        <h1>EcoSmart</h1>
+                    </div>
+                    <p class="subtitle">Sistema Inteligente de Reciclaje Escolar</p>
+                </header>
+
+                <div class="menu-grid">
+                    <div class="menu-card" onclick="showStudentLogin()">
+                        <div class="card-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3>Estudiante</h3>
+                        <p>Consulta tus puntos y progreso</p>
+                        <div class="card-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="menu-card" onclick="showGuestAccess()">
+                        <div class="card-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3>Acceso Invitado</h3>
+                        <p>Ver ranking y estadísticas</p>
+                        <div class="card-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="menu-card" onclick="showAdminLogin()">
+                        <div class="card-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <h3>Administrador</h3>
+                        <p>Panel de control y gestión</p>
+                        <div class="card-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-preview">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-bottles">0</span>
+                        <span class="stat-label">Botellas Recolectadas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="active-students">0</span>
+                        <span class="stat-label">Estudiantes Activos</span>
+                    </div>
+                </div>
+
+                <!-- Grade Competition Chart - Moved to bottom of main-menu -->
+                <div id="grade-chart" class="grade-chart-section">
+                    <!-- Chart will be populated by JavaScript -->
+                    <h3 class="grade-chart-title">Ranking por Grados</h3>
+                    <div class="grade-chart-content">
+                        <p class="no-data-message">Cargando ranking de grados...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Login -->
+        <div id="student-login" class="page">
+            <div class="container">
+                <div class="back-button" onclick="showMainMenu()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Volver</span>
+                </div>
+
+                <div class="login-form">
+                    <div class="form-header">
+                        <i class="fas fa-user-graduate"></i>
+                        <h2>Acceso Estudiante</h2>
+                        <p>Ingresa tu código de 4 dígitos</p>
+                    </div>
+
+                    <div class="code-input-container">
+                        <input type="text" id="student-code" maxlength="4" placeholder="0000" class="code-input">
+                        <button onclick="loginStudent()" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Ingresar
+                        </button>
+                    </div>
+
+                    <div id="student-login-error" class="error-message"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Dashboard -->
+        <div id="student-dashboard" class="page">
+            <div class="container">
+                <div class="dashboard-header">
+                    <div class="back-button" onclick="showMainMenu()">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Salir</span>
+                    </div>
+                    <div class="student-info">
+                        <h2 id="student-name">Cargando...</h2>
+                        <span id="student-grade" class="grade-badge">Grado</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card points-card">
+                        <div class="card-header">
+                            <i class="fas fa-star"></i>
+                            <h3>Mis Puntos</h3>
+                        </div>
+                        <div class="points-display">
+                            <span id="student-points">0</span>
+                            <small>puntos</small>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card ranking-card">
+                        <div class="card-header">
+                            <i class="fas fa-trophy"></i>
+                            <h3>Mi Posición</h3>
+                        </div>
+                        <div class="ranking-info">
+                            <div class="rank-item">
+                                <span class="rank-label">General:</span>
+                                <span id="general-rank" class="rank-value">#-</span>
+                            </div>
+                            <div class="rank-item">
+                                <span class="rank-label">En mi grado:</span>
+                                <span id="grade-rank" class="rank-value">#-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card progress-card">
+                        <div class="card-header">
+                            <i class="fas fa-target"></i>
+                            <h3>Progreso</h3>
+                        </div>
+                        <div class="progress-info">
+                            <!-- These will be dynamically populated based on current rank -->
+                            <div class="progress-item" id="progress-to-top1-container">
+                                <span>Para Top 1:</span>
+                                <span id="points-to-top1">- puntos</span>
+                            </div>
+                            <div class="progress-item" id="progress-to-top2-container">
+                                <span>Para Top 2:</span>
+                                <span id="points-to-top2">- puntos</span>
+                            </div>
+                            <div class="progress-item" id="progress-to-top3-container">
+                                <span>Para Top 3:</span>
+                                <span id="points-to-top3">- puntos</span>
+                            </div>
+                            <div class="progress-item" id="progress-to-top4-container">
+                                <span>Para Top 4:</span>
+                                <span id="points-to-top4">- puntos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card history-card">
+                        <div class="card-header">
+                            <i class="fas fa-history"></i>
+                            <h3>Historial Reciente</h3>
+                        </div>
+                        <div id="student-history" class="history-list">
+                            <p class="no-data">Sin actividad reciente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guest Access (Ranking) -->
+        <div id="guest-access" class="page">
+            <div class="container">
+                <div class="back-button" onclick="showMainMenu()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Volver</span>
+                </div>
+
+                <div class="ranking-header">
+                    <h2><i class="fas fa-trophy"></i> Ranking de Estudiantes</h2>
+                    <div id="guest-grade-filters" class="grade-filters">
+                        <!-- Grade filter buttons will be dynamically loaded here -->
+                        <button class="filter-btn active" onclick="filterByGrade('all')">Todos</button>
+                    </div>
+                </div>
+
+                <div class="ranking-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-recycle"></i>
+                        <div>
+                            <span id="ranking-total-bottles">0</span>
+                            <small>Botellas Totales</small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <span id="ranking-active-students">0</span>
+                            <small>Estudiantes Activos</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ranking-table-container">
+                    <table class="ranking-table">
+                        <thead>
+                            <tr>
+                                <th>Posición</th>
+                                <th>Estudiante</th>
+                                <th>Grado</th>
+                                <th>Puntos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-tbody">
+                            <tr>
+                                <td colspan="4" class="loading-row">Cargando ranking...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Login -->
+        <div id="admin-login" class="page">
+            <div class="container">
+                <div class="back-button" onclick="showMainMenu()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Volver</span>
+                </div>
+
+                <div class="login-form">
+                    <div class="form-header">
+                        <i class="fas fa-shield-alt"></i>
+                        <h2>Acceso Administrador</h2>
+                        <p>Ingresa tus credenciales</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-username">Usuario</label>
+                        <input type="text" id="admin-username" placeholder="Nombre de usuario">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-password">Contraseña</label>
+                        <input type="password" id="admin-password" placeholder="Contraseña">
+                    </div>
+
+                    <button onclick="loginAdmin()" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Iniciar Sesión
+                    </button>
+
+                    <div id="admin-login-error" class="error-message"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="admin-dashboard" class="page">
+            <div class="container">
+                <div class="admin-header">
+                    <div class="admin-title">
+                        <h2><i class="fas fa-cog"></i> Panel Administrativo</h2>
+                        <span id="admin-welcome">Bienvenido, Administrador</span>
+                    </div>
+                    <button onclick="logoutAdmin()" class="btn btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </button>
+                </div>
+
+                <div class="admin-tabs">
+                    <button class="tab-btn active" onclick="showAdminTab('students')">
+                        <i class="fas fa-users"></i>
+                        Estudiantes
+                    </button>
+                    <button class="tab-btn" onclick="showAdminTab('grades')">
+                        <i class="fas fa-graduation-cap"></i>
+                        Grados
+                    </button>
+                    <button class="tab-btn" onclick="showAdminTab('statistics')">
+                        <i class="fas fa-chart-bar"></i>
+                        Estadísticas
+                    </button>
+                    <button class="tab-btn" onclick="showAdminTab('export')">
+                        <i class="fas fa-download"></i>
+                        Exportar Datos
+                    </button>
+                    <button class="tab-btn" onclick="showAdminTab('settings')">
+                        <i class="fas fa-cog"></i>
+                        Configuración
+                    </button>
+                </div>
+
+                <!-- Students Tab -->
+                <div id="admin-students" class="admin-tab active">
+                    <div class="tab-header">
+                        <h3>Gestión de Estudiantes</h3>
+                        <button onclick="showAddStudentModal()" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Agregar Estudiante
+                        </button>
+                    </div>
+
+                    <div class="students-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Grado</th>
+                                    <th>Puntos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="students-tbody">
+                                <tr>
+                                    <td colspan="5" class="loading-row">Cargando estudiantes...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Grades Tab (New) -->
+                <div id="admin-grades" class="admin-tab">
+                    <div class="tab-header">
+                        <h3>Gestión de Grados</h3>
+                        <button onclick="showAddGradeModal()" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Agregar Grado
+                        </button>
+                    </div>
+
+                    <div class="grades-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Grado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="grades-tbody">
+                                <tr>
+                                    <td colspan="2" class="loading-row">Cargando grados...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Statistics Tab -->
+                <div id="admin-statistics" class="admin-tab">
+                    <div class="tab-header">
+                        <h3>Estadísticas del Sistema</h3>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card-large">
+                            <i class="fas fa-recycle"></i>
+                            <div>
+                                <span id="admin-total-bottles">0</span>
+                                <small>Botellas Recolectadas</small>
+                            </div>
+                        </div>
+                        <div class="stat-card-large">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <span id="admin-total-students">0</span>
+                                <small>Estudiantes Registrados</small>
+                            </div>
+                        </div>
+                        <div class="stat-card-large">
+                            <i class="fas fa-star"></i>
+                            <div>
+                                <span id="admin-total-points">0</span>
+                                <small>Puntos Totales</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grade-stats">
+                        <h4>Estadísticas por Grado</h4>
+                        <div id="grade-stats-container" class="grade-stats-grid">
+                            <!-- Grade stats will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Tab -->
+                <div id="admin-export" class="admin-tab">
+                    <div class="tab-header">
+                        <h3>Exportar Datos del Sistema</h3>
+                    </div>
+
+                    <div class="export-section">
+                        <div class="export-filters">
+                            <h4>Filtros de Exportación</h4>
+                            
+                            <div class="filter-grid">
+                                <div class="form-group">
+                                    <label for="export-start-date">Fecha de Inicio</label>
+                                    <input type="date" id="export-start-date">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="export-end-date">Fecha de Fin</label>
+                                    <input type="date" id="export-end-date">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="export-grade-filter">Filtrar por Grado</label>
+                                    <select id="export-grade-filter">
+                                        <option value="all">Todos los grados</option>
+                                        <!-- Grades will be dynamically loaded here -->
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="export-student-filter">Buscar Estudiante</label>
+                                    <input type="text" id="export-student-filter" placeholder="Nombre o código">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="export-options">
+                            <h4>Formatos de Exportación</h4>
+                            <div class="export-buttons">
+                                <button onclick="exportData('csv')" class="btn btn-primary export-btn">
+                                    <i class="fas fa-file-csv"></i>
+                                    Exportar CSV
+                                    <small>Archivo de valores separados por comas</small>
+                                </button>
+                                
+                                <button onclick="exportData('excel')" class="btn btn-success export-btn">
+                                    <i class="fas fa-file-excel"></i>
+                                    Exportar Excel
+                                    <small>Archivo compatible con Microsoft Excel</small>
+                                </button>
+                                
+                                <button onclick="exportData('pdf')" class="btn btn-danger export-btn">
+                                    <i class="fas fa-file-pdf"></i>
+                                    Exportar PDF
+                                    <small>Documento PDF para impresión</small>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="admin-settings" class="admin-tab">
+                    <div class="tab-header">
+                        <h3>Configuración del Sistema</h3>
+                    </div>
+
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="points-per-bottle">Puntos por Botella</label>
+                            <input type="number" id="points-per-bottle" min="1" value="1">
+                        </div>
+
+                        <button onclick="saveSettings()" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Guardar Configuración
+                        </button>
+
+                        <h4 class="section-title">Gestión de Datos Críticos</h4>
+                        <div class="critical-data-management">
+                            <button onclick="confirmClearAllPoints()" class="btn btn-warning full-width-btn">
+                                <i class="fas fa-eraser"></i> Borrar Todos los Puntos
+                            </button>
+                            <button onclick="confirmDeleteAllStudents()" class="btn btn-danger full-width-btn">
+                                <i class="fas fa-user-slash"></i> Eliminar Todos los Estudiantes
+                            </button>
+                            <button onclick="confirmDeleteAllGrades()" class="btn btn-danger full-width-btn">
+                                <i class="fas fa-graduation-cap"></i> Eliminar Todos los Grados
+                            </button>
+                        </div>
+
+                        <h4 class="section-title">Cambiar Credenciales de Administrador</h4>
+                        <div class="admin-credentials-form">
+                            <div class="form-group">
+                                <label for="new-admin-username">Nuevo Usuario</label>
+                                <input type="text" id="new-admin-username" placeholder="Nuevo nombre de usuario">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-admin-password">Nueva Contraseña</label>
+                                <div class="password-input-container">
+                                    <input type="password" id="new-admin-password" placeholder="Nueva contraseña" onkeyup="checkPasswordStrength()">
+                                    <span class="password-toggle" onclick="togglePasswordVisibility('new-admin-password')">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                                <div id="password-strength-meter" class="password-strength-meter">
+                                    <div class="strength-bar" id="strength-bar"></div>
+                                    <span id="strength-text">Débil</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-admin-password">Confirmar Contraseña</label>
+                                <div class="password-input-container">
+                                    <input type="password" id="confirm-admin-password" placeholder="Confirma la nueva contraseña">
+                                    <span class="password-toggle" onclick="togglePasswordVisibility('confirm-admin-password')">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <button onclick="changeAdminCredentials()" class="btn btn-primary">
+                                <i class="fas fa-key"></i> Cambiar Credenciales
+                            </button>
+                            <div id="admin-credentials-error" class="error-message"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Student Modal -->
+        <div id="add-student-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Agregar Nuevo Estudiante</h3>
+                    <button onclick="closeAddStudentModal()" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="new-student-code">Código (4 dígitos)</label>
+                        <input type="text" id="new-student-code" maxlength="4" placeholder="0000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-student-name">Nombre Completo</label>
+                        <input type="text" id="new-student-name" placeholder="Nombre del estudiante">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-student-grade">Grado</label>
+                        <select id="new-student-grade" onchange="handleGradeChange(this)">
+                            <option value="">Seleccionar grado</option>
+                            <!-- Grades will be dynamically loaded here -->
+                            <option value="custom">Otro (personalizado)</option>
+                        </select>
+                    </div>
+
+                    <div id="custom-grade-input" class="form-group" style="display: none;">
+                        <label for="new-custom-grade">Grado Personalizado</label>
+                        <input type="text" id="new-custom-grade" placeholder="Ej: 8-1, Preescolar, etc.">
+                    </div>
+
+                    <div id="add-student-error" class="error-message"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button onclick="closeAddStudentModal()" class="btn btn-secondary">Cancelar</button>
+                    <button onclick="addStudent()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Agregar Estudiante
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Student Modal -->
+        <div id="edit-student-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Editar Estudiante</h3>
+                    <button onclick="closeEditStudentModal()" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit-student-name">Nombre Completo</label>
+                        <input type="text" id="edit-student-name" placeholder="Nombre del estudiante">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-student-grade">Grado</label>
+                        <select id="edit-student-grade" onchange="handleGradeChange(this)">
+                            <!-- Grades will be dynamically loaded here -->
+                            <option value="custom">Otro (personalizado)</option>
+                        </select>
+                    </div>
+
+                    <div id="edit-custom-grade-input" class="form-group" style="display: none;">
+                        <label for="edit-custom-grade">Grado Personalizado</label>
+                        <input type="text" id="edit-custom-grade" placeholder="Ej: 8-1, Preescolar, etc.">
+                    </div>
+
+                    <div id="edit-student-error" class="error-message"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button onclick="closeEditStudentModal()" class="btn btn-secondary">Cancelar</button>
+                    <button onclick="updateStudent()" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Grade Modal (New) -->
+        <div id="add-grade-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Agregar Nuevo Grado</h3>
+                    <button onclick="closeAddGradeModal()" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="new-grade-name">Nombre del Grado</label>
+                        <input type="text" id="new-grade-name" placeholder="Ej: 8-1, Preescolar">
+                    </div>
+                    <div id="add-grade-error" class="error-message"></div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeAddGradeModal()" class="btn btn-secondary">Cancelar</button>
+                    <button onclick="addGrade()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Agregar Grado
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Stats Modal (New) -->
+        <div id="student-stats-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Estadísticas del Estudiante</h3>
+                    <button onclick="closeStudentStatsModal()" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="student-stats-summary">
+                        <p><strong>Nombre:</strong> <span id="stats-student-name"></span></p>
+                        <p><strong>Grado:</strong> <span id="stats-student-grade"></span></p>
+                        <p><strong>Puntos Actuales:</strong> <span id="stats-student-points"></span></p>
+                    </div>
+                    <div class="student-stats-ranking">
+                        <h4>Posición en el Ranking</h4>
+                        <p><strong>Global:</strong> <span id="stats-global-rank"></span></p>
+                        <p><strong>En su Grado:</strong> <span id="stats-grade-rank"></span></p>
+                    </div>
+                    <div class="student-stats-progress">
+                        <h4>Puntos para el Top Global</h4>
+                        <!-- These will be dynamically populated based on current rank -->
+                        <p id="stats-to-top1-container"><strong>Para Top 1:</strong> <span id="stats-to-top1"></span></p>
+                        <p id="stats-to-top2-container"><strong>Para Top 2:</strong> <span id="stats-to-top2"></span></p>
+                        <p id="stats-to-top3-container"><strong>Para Top 3:</strong> <span id="stats-to-top3"></span></p>
+                        <p id="stats-to-top4-container"><strong>Para Top 4:</strong> <span id="stats-to-top4"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeStudentStatsModal()" class="btn btn-secondary">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Confirmation Modal (New) -->
+        <div id="confirmation-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="confirmation-title">Confirmación</h3>
+                    <button onclick="cancelConfirmation()" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmation-message">¿Estás seguro de que deseas realizar esta acción?</p>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="cancelConfirmation()" class="btn btn-secondary">Cancelar</button>
+                    <button id="confirm-action-btn" class="btn btn-danger">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Points Modal (New) -->
+        <div id="add-points-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Aumentar Puntos</h3>
+                    <button onclick="closeAddPointsModal()" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Aumentar puntos para: <strong id="add-points-student-name"></strong> (<span id="add-points-student-grade"></span>)</p>
+                    <div class="form-group">
+                        <label for="points-to-add">Puntos a añadir (1-15)</label>
+                        <input type="number" id="points-to-add" min="1" max="15" value="10">
+                    </div>
+                    <div id="add-points-error" class="error-message"></div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeAddPointsModal()" class="btn btn-secondary">Cancelar</button>
+                    <button onclick="confirmIncreaseStudentPoints()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Aumentar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Grade Students Modal (New) -->
+        <div id="view-grade-students-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Estudiantes del Grado: <span id="view-grade-students-title"></span></h3>
+                    <button onclick="closeViewGradeStudentsModal()" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="ranking-table-container">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>Posición</th>
+                                    <th>Estudiante</th>
+                                    <th>Puntos</th>
+                                </tr>
+                            </thead>
+                            <tbody id="view-grade-students-tbody">
+                                <tr>
+                                    <td colspan="3" class="loading-row">Cargando estudiantes...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeViewGradeStudentsModal()" class="btn btn-secondary">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Success/Error Messages -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
