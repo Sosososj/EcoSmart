@@ -116,12 +116,6 @@ const char* ssid = "TU_RED_WIFI";
 const char* password = "TU_CONTRASEÑA_WIFI";
 ```
 
-### 3. Configuración de Firebase
-
-#### Base de Datos:
-- URL: `https://botellasreciclaje-542b1-default-rtdb.firebaseio.com/`
-- Estructura de datos predefinida
-- Reglas de seguridad configuradas
 
 #### Datos de Ejemplo Incluidos:
 - 10 estudiantes de muestra distribuidos en todos los grados
