@@ -4,7 +4,7 @@ import { getDatabase } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-
 
 // Firebase configuration
 const firebaseConfig = {
-    databaseURL: "https://botellasreciclaje-542b1-default-rtdb.firebaseio.com/"
+    databaseURL: "TU_DATABASE"
 };
 
 // Initialize Firebase
